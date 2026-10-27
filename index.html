@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مارکیٹ اینالائزر</title>
+<style>
+:root{
+  --bg:#f3f1ec;--panel:#fff;--panel2:#f7f5f0;--line:#e3dfd6;--text:#1c1a16;--mute:#6f6a5f;
+  --up:#0f8a5f;--down:#c93a3a;--wait:#8a8473;--gold:#a8760f;--accent:#1f3a5f;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0c1016;--panel:#141a23;--panel2:#1a212c;--line:#263040;--text:#e8ecf2;--mute:#8b96a8;
+  --up:#2fd39a;--down:#ff6b6b;--wait:#9aa4b5;--gold:#e0b24a;--accent:#7fb2ff;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1016;--panel:#141a23;--panel2:#1a212c;--line:#263040;--text:#e8ecf2;--mute:#8b96a8;
+  --up:#2fd39a;--down:#ff6b6b;--wait:#9aa4b5;--gold:#e0b24a;--accent:#7fb2ff;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Noto Nastaliq Urdu","Noto Sans Arabic","Segoe UI",Tahoma,sans-serif;line-height:1.7}
+.wrap{max-width:460px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+h1{font-size:18px;margin:0;font-weight:700}
+.badge{font-size:11px;padding:2px 10px;border-radius:99px;border:1px solid var(--line);color:var(--mute);background:var(--panel)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--panel2);padding:4px;border-radius:12px;margin-bottom:14px;direction:ltr}
+.tab{border:0;background:transparent;color:var(--mute);padding:9px 4px;border-radius:9px;font:600 13px/1.2 system-ui,sans-serif;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--panel);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.tab:focus-visible,.theme:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.lbl{font-size:12px;color:var(--mute)}
+.price{font:700 40px/1.1 system-ui,sans-serif;direction:ltr;text-align:left;margin:6px 0 2px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.chg{direction:ltr;text-align:left;font:600 14px system-ui,sans-serif}
+.up{color:var(--up)}.down{color:var(--down)}
+svg.spark{width:100%;height:84px;display:block;margin-top:12px;direction:ltr}
+.signal{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sig-main{font:700 26px system-ui,sans-serif;direction:ltr}
+.sig-note{font-size:13px;color:var(--mute)}
+.meter{height:8px;background:var(--panel2);border-radius:99px;margin-top:12px;overflow:hidden;direction:ltr}
+.meter i{display:block;height:100%;width:50%;border-radius:99px;background:var(--wait);transition:width .4s,background .4s}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kv .v{font:700 20px system-ui,sans-serif;direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
+.timer{display:flex;align-items:center;gap:12px}
+.bar{flex:1;height:6px;background:var(--panel2);border-radius:99px;overflow:hidden;direction:ltr}
+.bar i{display:block;height:100%;background:var(--gold);width:100%;transition:width 1s linear}
+.tv{font:700 15px system-ui,sans-serif;direction:ltr;min-width:44px;text-align:left}
+.note{font-size:12px;color:var(--mute);border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
+.theme{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>مارکیٹ اینالائزر</h1>
+      <span class="badge">ڈیمو ڈیٹا</span>
+    </div>
+    <button class="theme" id="themeBtn" aria-label="تھیم تبدیل کریں">◐</button>
+  </header>
+
+  <div class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" aria-selected="true" data-m="XAUUSD">Gold XAU/USD</button>
+    <button class="tab" role="tab" aria-selected="false" data-m="BTCUSDT">BTC/USDT</button>
+    <button class="tab" role="tab" aria-selected="false" data-m="EURUSD">EUR/USD</button>
+  </div>
+
+  <section class="card">
+    <div class="lbl">موجودہ قیمت</div>
+    <div class="price" id="price">—</div>
+    <div class="chg" id="chg">—</div>
+    <svg class="spark" id="spark" viewBox="0 0 300 84" preserveAspectRatio="none" aria-hidden="true">
+      <polyline id="line" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" points=""/>
+    </svg>
+  </section>
+
+  <section class="card">
+    <div class="signal">
+      <div>
+        <div class="lbl">موجودہ رجحان</div>
+        <div class="sig-main" id="sig">WAIT</div>
+      </div>
+      <div class="sig-note" id="sigNote">ڈیٹا جمع ہو رہا ہے</div>
+    </div>
+    <div class="meter"><i id="meter"></i></div>
+  </section>
+
+  <section class="row">
+    <div class="card kv"><div class="lbl">اوپر کی حد (TP)</div><div class="v up" id="tp">—</div></div>
+    <div class="card kv"><div class="lbl">نیچے کی حد (SL)</div><div class="v down" id="sl">—</div></div>
+  </section>
+
+  <section class="card">
+    <div class="timer">
+      <div class="lbl">کینڈل بند ہونے میں</div>
+      <div class="bar"><i id="bar"></i></div>
+      <div class="tv" id="tv">00:60</div>
+    </div>
+  </section>
+
+  <p class="note">یہ صفحہ بے ترتیب (simulated) قیمتیں دکھاتا ہے، لائیو مارکیٹ ڈیٹا نہیں۔ سگنل صرف پچھلے چند سیکنڈ کی حرکت پر مبنی ہیں اور مستقبل کی پیش گوئی نہیں۔ اسے ٹریڈنگ کے فیصلوں کے لیے استعمال نہ کریں۔</p>
+</div>
+
+<script>
+var M={
+  XAUUSD:{start:2385.20,step:.4,dec:2},
+  BTCUSDT:{start:64200,step:8,dec:2},
+  EURUSD:{start:1.0860,step:.0002,dec:4}
+};
+var cur="XAUUSD",p,open,hi,lo,hist=[],left=60,base;
+var $=function(i){return document.getElementById(i)};
+
+function reset(){
+  var m=M[cur];p=m.start;base=p;open=p;hi=p;lo=p;hist=[p];left=60;
+}
+function fmt(v){return v.toLocaleString("en-US",{minimumFractionDigits:M[cur].dec,maximumFractionDigits:M[cur].dec})}
+function sma(a,n){var s=a.slice(-n);return s.reduce(function(x,y){return x+y},0)/s.length}
+
+function draw(){
+  var a=hist.slice(-60),mn=Math.min.apply(null,a),mx=Math.max.apply(null,a),r=(mx-mn)||1;
+  $("line").setAttribute("points",a.map(function(v,i){
+    return (i/Math.max(a.length-1,1)*300).toFixed(1)+","+(78-((v-mn)/r)*72).toFixed(1)
+  }).join(" "));
+}
+
+function tick(){
+  var m=M[cur];
+  p=+(p+(Math.random()-.5)*m.step).toFixed(m.dec);
+  hi=Math.max(hi,p);lo=Math.min(lo,p);
+  hist.push(p);if(hist.length>300)hist.shift();
+
+  $("price").textContent=fmt(p);
+  var d=p-base,pct=d/base*100,c=$("chg");
+  c.textContent=(d>=0?"▲ ":"▼ ")+fmt(Math.abs(d))+"  ("+(d>=0?"+":"")+pct.toFixed(3)+"%)";
+  c.className="chg "+(d>=0?"up":"down");
+
+  var spread=(hi-lo)||p*.001;
+  $("tp").textContent=fmt(hi+spread*.4);
+  $("sl").textContent=fmt(lo-spread*.4);
+
+  var diff=p-open,strength=Math.min(Math.abs(diff)/(spread*.6),1);
+  var s=$("sig"),mt=$("meter"),n=$("sigNote");
+  var trend=hist.length>12?sma(hist,5)-sma(hist,12):0;
+  if(diff>spread*.2&&trend>=0){s.textContent="BUY";s.className="sig-main up";mt.style.background="var(--up)";n.textContent="کینڈل اوپر کی طرف ہے"}
+  else if(diff<-spread*.2&&trend<=0){s.textContent="SELL";s.className="sig-main down";mt.style.background="var(--down)";n.textContent="کینڈل نیچے کی طرف ہے"}
+  else{s.textContent="WAIT";s.className="sig-main";mt.style.background="var(--wait)";n.textContent="مارکیٹ سست ہے";strength=.15}
+  mt.style.width=(strength*100)+"%";
+
+  left--;
+  if(left<=0){left=60;open=p;hi=p;lo=p}
+  $("tv").textContent="00:"+(left<10?"0":"")+left;
+  $("bar").style.width=(left/60*100)+"%";
+  draw();
+}
+
+document.querySelectorAll(".tab").forEach(function(b){
+  b.addEventListener("click",function(){
+    cur=b.dataset.m;
+    document.querySelectorAll(".tab").forEach(function(x){x.setAttribute("aria-selected",x===b)});
+    reset();tick();
+  });
+});
+$("themeBtn").addEventListener("click",function(){
+  var r=document.documentElement,dark=getComputedStyle(r).colorScheme.indexOf("dark")>-1;
+  r.setAttribute("data-theme",dark?"light":"dark");
+});
+reset();tick();setInterval(tick,1000);
+</script>
+</body>
+</html>
